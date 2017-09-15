@@ -23,8 +23,15 @@ class DriverServer(bufferedReader: BufferedReader, printWriter: PrintWriter, por
       printWriter.println(command)
       printWriter.flush()
 
-      val rep = server.getRepFromStream(bufferedReader)
-      val reply = dexCmd.respond(rep)
+      val rep = new StringBuffer(1024)
+      var tmp = bufferedReader.readLine()
+      while (tmp.length < 7 || !tmp.substring(0, 7).equals("scala> ")) {
+        println(tmp)
+        rep.append(tmp).append("\n")
+        tmp = bufferedReader.readLine()
+      }
+
+      val reply = dexCmd.respond(rep.toString)
       server.putMsg(reply)
       server.send()
     }

@@ -1,14 +1,8 @@
 package Network
 
 import java.io.{BufferedReader, PrintWriter}
-import java.lang.reflect.Field
-import java.nio.{ByteBuffer, ByteOrder, CharBuffer}
-import java.nio.charset.Charset
-
 import Configuration.DexConfig
 import DexProtocol._
-import base.DexMethod
-import Network.DexObject._
 import org.zeromq.ZMQ
 
 class DexZmq(port: Int) extends Zmq {
@@ -30,19 +24,6 @@ class DexZmq(port: Int) extends Zmq {
       case MsgType.Dex_Join => getMsg[DexJoin](new DexJoin)
       case MsgType.Dex_Apply => getMsg[DexApply](new DexApply)
     }
-  }
-
-  def getRepFromStream(bufferedreader: BufferedReader): String = {
-    val rep = new StringBuilder
-    var tmp = bufferedreader.readLine()
-    while (tmp.length < 7 || !tmp.substring(0, 7).equals("scala> ")) {
-      println(tmp)
-      rep.append(tmp + "\n")
-      tmp = bufferedreader.readLine()
-    }
-    println(tmp)
-
-    rep.toString()
   }
 }
 
