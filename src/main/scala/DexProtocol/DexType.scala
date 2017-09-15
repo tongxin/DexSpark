@@ -8,23 +8,30 @@ import base.{DBConnProperties, DexMethod}
 import scala.beans.BeanProperty
 
 trait DexCommand {
-  def handler(): Unit
+  def cmdType: Int
+  def genCode(): String
   def respond(input: String): String
 }
 
 class DexConnect(@BeanProperty var master: String, server: DexZmq) extends DexCommand {
   def this() = this("")
 
-  override def handler(): Unit = {
+  override def cmdType: Int = MsgType.Dex_Connect
+
+  override def genCode(): String = {
+    return ""
+  }
+
+  override def respond(input: String): String = {
+    return "Connected."
+  }
+
+  def handle(): Unit = {
     val port = DexConfig.getPort()
     val msg = master + ":" + port.toString
     server.putMsg(msg)
     server.send()
     DexMain.start(DexConfig.getPort())
-  }
-
-  override def respond(input: String): String = {
-    return "Connected."
   }
 }
 
@@ -32,7 +39,9 @@ class DexDisConnect(@BeanProperty var master: String) extends DexCommand {
 
   def this() = this("")
 
-  override def handler(): String = {
+  override def cmdType: Int = MsgType.Dex_DisConnect
+
+  override def genCode(): String = {
     ":q"
   }
 
@@ -49,7 +58,9 @@ class DexDataFrame(@BeanProperty var dataframe: String,
 
   def this() = this("", "", 0, null)
 
-  def handler(): String = {
+  override def cmdType: Int = MsgType.Dex_DataFrame
+
+  override def genCode(): String = {
 
     val dbconn = new DBConnProperties(db(0), db(1), db(2), db(3))
     val url = "jdbc:postgresql://" + dbconn.getUrl
@@ -73,7 +84,7 @@ class DexDataFrame(@BeanProperty var dataframe: String,
     command
   }
 
-  def respond(input: String): String = {
+  override def respond(input: String): String = {
     println("respond: " + input)
     val dexDataFrameCreated = "1"
     dexDataFrameCreated
@@ -86,7 +97,9 @@ class DexRepartition(@BeanProperty var newDataframe: String,
                      @BeanProperty var partitionCols: Array[String]) extends DexCommand {
   def this() = this("", "", 0, null)
 
-  def handler(): String = {
+  override def cmdType: Int = MsgType.Dex_Repartition
+
+  override def genCode(): String = {
     val command = s"val $newDataframe = $oldDataframe.repartition($numsPartition, $partitionCols)"
     command
   }
@@ -98,12 +111,18 @@ class DexRepartition(@BeanProperty var newDataframe: String,
 
 class DexDataFrameIterator(@BeanProperty var iterator: String,
                            @BeanProperty var dataframe: String,
-                           @BeanProperty var partitionId: Int) {
+                           @BeanProperty var partitionId: Int) extends DexCommand {
   def this() = this("", "", 0)
 
-  def handler(): String = {
+  override def cmdType: Int = MsgType.Dex_Iterator
+
+  override def genCode(): String = {
     val command = s"val $iterator = $dataframe.toLocalIterator"
     command
+  }
+
+  override def respond(input: String): String = {
+
   }
 }
 
@@ -114,7 +133,9 @@ class DexJoin(@BeanProperty var newDataframe: String,
 
   def this() = this("", "", "", null)
 
-  def handler(): String = {
+  override def cmdType: Int = MsgType.Dex_Join
+
+  override def genCode(): String = {
     val seqCol = cols.toSeq
     val command = new StringBuilder
     command.append(s"val $newDataframe = $dataframe1.join($dataframe2,")
@@ -135,7 +156,7 @@ class DexJoin(@BeanProperty var newDataframe: String,
     command.toString()
   }
 
-  def respond(input: String): String = {
+  override def respond(input: String): String = {
     println("input:" + input)
     val rep = new StringBuilder
     val p = """StructField\((.*,.*,.*)\)""".r
@@ -166,12 +187,14 @@ class DexUnion(@BeanProperty var newDataframe: String,
 
   def this() = this("", "", "")
 
-  def handler(): String = {
+  override def cmdType: Int = MsgType.Dex_Union
+
+  override def genCode(): String = {
     val command = s"val $newDataframe = $dataframe1.union($dataframe2)"
     command
   }
 
-  def respond(input: String): String = {
+  override def respond(input: String): String = {
     val dexDataFrameUnioned = "1"
     dexDataFrameUnioned
   }
@@ -182,7 +205,9 @@ class DexApply(@BeanProperty var dataframe: String,
                @BeanProperty var params: Array[String]) extends DexCommand {
   def this() = this("", "", null)
 
-  def handler(): String = {
+  override def cmdType: Int = MsgType.Dex_Apply
+
+  override def genCode(): String = {
     println("DexApply")
     var command = new StringBuilder
     function match {
@@ -197,7 +222,7 @@ class DexApply(@BeanProperty var dataframe: String,
     command.toString()
   }
 
-  def respond(input: String): String = {
+  override def respond(input: String): String = {
     val dexDataFrameUnioned = "1"
     dexDataFrameUnioned
   }

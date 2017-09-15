@@ -6,7 +6,9 @@ import java.nio.{ByteBuffer, ByteOrder, CharBuffer}
 import java.nio.charset.Charset
 
 import Configuration.DexConfig
+import DexProtocol._
 import base.DexMethod
+import Network.DexObject._
 import org.zeromq.ZMQ
 
 class DexZmq(port: Int) extends Zmq {
@@ -17,6 +19,18 @@ class DexZmq(port: Int) extends Zmq {
   socket.setTCPKeepAlive(1)
 
   def getMsgType(): Int = getMsg[Int]
+
+  def getDexCmd(cmdType: Int): DexCommand = {
+    cmdType match {
+      case MsgType.Dex_Connect => getMsg[DexConnect](new DexConnect(DexConfig.getMaster(), this))
+      case MsgType.Dex_DisConnect => getMsg[DexDisConnect](new DexDisConnect)
+      case MsgType.Dex_DataFrame => getMsg[DexDataFrame](new DexDataFrame)
+      case MsgType.Dex_Repartition => getMsg[DexRepartition](new DexRepartition)
+      case MsgType.Dex_Iterator => getMsg[DexDataFrameIterator](new DexDataFrameIterator)
+      case MsgType.Dex_Join => getMsg[DexJoin](new DexJoin)
+      case MsgType.Dex_Apply => getMsg[DexApply](new DexApply)
+    }
+  }
 
   def getRepFromStream(bufferedreader: BufferedReader): String = {
     val rep = new StringBuilder

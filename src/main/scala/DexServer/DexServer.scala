@@ -20,7 +20,7 @@ object DexServer {
        //接收连接请求时，启动DriverServer进行查询服务
         case MsgType.Dex_Connect => {
           val conn = server.getMsg[DexConnect](new DexConnect(DexConfig.getMaster))
-          conn.handler(server)
+          conn.genCode()
         }
         case _ => {
           println("error type:" + msgtyp)
