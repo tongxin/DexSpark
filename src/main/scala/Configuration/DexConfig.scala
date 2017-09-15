@@ -26,4 +26,8 @@ object DexConfig {
     config.getInt("port")
   }
 
+  def getDexJarPath(): String = {
+    config.getString("dexjar")
+  }
+
 }

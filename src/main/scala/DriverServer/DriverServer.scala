@@ -13,18 +13,20 @@ import Network.DexZmq
 
 class DriverServer(bufferedReader: BufferedReader, printWriter: PrintWriter, port: Int) {
   val server: DexZmq = new DexZmq(port)
-  while (true) {
-    server.recv()
-    val msgType = server.getMsgType()
-    val dexCmd  = server.getDexCmd(msgType)
-    val command = dexCmd.genCode()
+  def start(): Unit = {
+    while (true) {
+      server.recv()
+      val msgType = server.getMsgType()
+      val dexCmd = server.getDexCmd(msgType)
+      val command = dexCmd.genCode()
 
-    printWriter.println(command)
-    printWriter.flush()
+      printWriter.println(command)
+      printWriter.flush()
 
-    val rep = server.getRepFromStream(bufferedReader)
-    val reply = dexCmd.respond(rep)
-    server.putMsg(reply)
-    server.send()
+      val rep = server.getRepFromStream(bufferedReader)
+      val reply = dexCmd.respond(rep)
+      server.putMsg(reply)
+      server.send()
+    }
   }
 }

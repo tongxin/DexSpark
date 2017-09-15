@@ -8,6 +8,7 @@ package DriverServer
 
 import java.io._
 
+import Configuration.DexConfig
 import org.apache.spark.launcher.SparkLauncher
 import org.apache.spark.repl.SparkILoop
 import org.apache.spark.sql.SparkSession
@@ -65,13 +66,18 @@ object DexMain{
         println(br.readLine())
       }
       println("start: new DriverServer")
-      new DriverServer(new BufferedReader(new InputStreamReader(pisDriver)), new PrintWriter(new OutputStreamWriter(posDriver)), port) //新建线程接收请求
+      new DriverServer(
+        new BufferedReader(new InputStreamReader(pisDriver)),
+        new PrintWriter(new OutputStreamWriter(posDriver)), port)
+        .start()
     }
 
-    interp = new DexILoop(new BufferedReader(new InputStreamReader(pisSpark)), new PrintWriter(new OutputStreamWriter(posSpark)))
+    interp = new DexILoop(
+      new BufferedReader(new InputStreamReader(pisSpark)),
+      new PrintWriter(new OutputStreamWriter(posSpark)))
     val settings = new GenericRunnerSettings(scalaOptionError)
     settings.usejavacp.value = true
-    settings.classpath.append("/home/caimy/DexServerZmq.jar")
+    settings.classpath.append(DexConfig.getDexJarPath())
     interp.process(settings)
     Option(sparkContext).map(_.stop())
   }

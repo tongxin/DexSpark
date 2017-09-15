@@ -19,8 +19,8 @@ object DexServer {
       msgtyp match {
        //接收连接请求时，启动DriverServer进行查询服务
         case MsgType.Dex_Connect => {
-          val conn = server.getMsg[DexConnect](new DexConnect(DexConfig.getMaster))
-          conn.genCode()
+          val conn = server.getMsg[DexConnect](new DexConnect(DexConfig.getMaster(), server))
+          conn.handle()
         }
         case _ => {
           println("error type:" + msgtyp)

@@ -44,28 +44,5 @@ class DexZmq(port: Int) extends Zmq {
 
     rep.toString()
   }
-
- //根据不同的消息类型调用各类型自带的响应操作
-  def handle[T](obj: T, bufferedreader: BufferedReader, printWriter: PrintWriter): Unit = {
-//    obj.getClass.getDeclaredFields.foreach(
-//      (i: Field) => {
-//        DexMethod.invokeSetMethod(obj, i.getName, getMsg(i.getType.toString), null)
-//        println(DexMethod.invokeGetMethod(obj, i.getName, null))
-//      }
-//    )
-    getMsg[T](obj)
-    val requestHandler = obj.getClass.getMethod("handler")
-    val command: String = requestHandler.invoke(obj).toString
-    //    println("command: " + command)
-    printWriter.println(command)
-    printWriter.flush()
-    //    println("printWriter end")
-
-    val rep = getRepFromStream(bufferedreader)
-    val responseHandler = obj.getClass.getMethod("respond", rep.getClass)
-    val finalRep = responseHandler.invoke(obj, rep).toString
-    putMsg(finalRep)
-    //    println("exit handle")
-  }
 }
 
