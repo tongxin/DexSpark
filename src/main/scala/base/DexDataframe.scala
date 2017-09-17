@@ -1,6 +1,6 @@
 package base
 
-import Applications.{Cluster, WifiUserAnalysis, WordCount}
+import Applications.{Clustering, WifiUserAnalysis, WordCount}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
 /**
@@ -15,7 +15,7 @@ import org.apache.spark.sql.{DataFrame, Row, SparkSession}
   * driver: 数据库连接驱动
   * df: dexDataFrame的主体
   */
-class dexDataFrame(val spark: SparkSession,
+class DexDataframe(val spark: SparkSession,
                    val table: String,
                    val numPartitions: Int,
                    val url: String,
@@ -51,24 +51,24 @@ class dexDataFrame(val spark: SparkSession,
       df
   }
 
-  def join(df: dexDataFrame, col: String): dexDataFrame = {
-    new dexDataFrame(df.url, df.user, df.passwd, df.driver, this.dataframe.join(df.dataframe, col))
+  def join(df: DexDataframe, col: String): DexDataframe = {
+    new DexDataframe(df.url, df.user, df.passwd, df.driver, this.dataframe.join(df.dataframe, col))
   }
 
-  def join(df: dexDataFrame, cols: Seq[String]): dexDataFrame = {
-    new dexDataFrame(df.url, df.user, df.passwd, df.driver, this.dataframe.join(df.dataframe, cols))
+  def join(df: DexDataframe, cols: Seq[String]): DexDataframe = {
+    new DexDataframe(df.url, df.user, df.passwd, df.driver, this.dataframe.join(df.dataframe, cols))
   }
 
-  def union(df: dexDataFrame): dexDataFrame = {
-    new dexDataFrame(df.url, df.user, df.passwd, df.driver, this.dataframe.union(df.dataframe))
+  def union(df: DexDataframe): DexDataframe = {
+    new DexDataframe(df.url, df.user, df.passwd, df.driver, this.dataframe.union(df.dataframe))
   }
 
-  def repartition(): dexDataFrame = {
-    new dexDataFrame(url, user, passwd, driver, this.dataframe.repartition())
+  def repartition(): DexDataframe = {
+    new DexDataframe(url, user, passwd, driver, this.dataframe.repartition())
   }
 
   def kmeans(tablename: String, numClusters: Int, numIterations: Int): Unit = {
-    new Cluster(tablename, numClusters, numIterations).compute(spark, dataframe, dbconn)
+    new Clustering(tablename, numClusters, numIterations).compute(spark, dataframe, dbconn)
   }
 
   def WifiUserAnalysis(tablename: String, numClusters: Int, numIterations: Int): Unit = {
@@ -81,13 +81,13 @@ class dexDataFrame(val spark: SparkSession,
 
 }
 
-object dexDataFrame {
+object DexDataframe {
   def main(args: Array[String]) {
     val spark = SparkSession
       .builder()
       .master("local")
       .appName("Spark Hive Example")
       .getOrCreate()
-    val df = new dexDataFrame(spark, "lenses", 2, "jdbc:postgresql://172.20.110.61:5432/exampledb", "postgres", "123456", "org.postgresql.Driver")
+    val df = new DexDataframe(spark, "lenses", 2, "jdbc:postgresql://172.20.110.61:5432/exampledb", "postgres", "123456", "org.postgresql.Driver")
   }
 }

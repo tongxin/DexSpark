@@ -19,9 +19,9 @@ import scala.beans.BeanProperty
   * numClusers: kmeans算法中生成簇个数
   * numIterations: kmeans算法的最高迭代次数
   */
-class Cluster(@BeanProperty var tablename: String,
-              @BeanProperty var numClusters: Int,
-              @BeanProperty var numIterations: Int) {
+class Clustering(@BeanProperty var tablename: String,
+                 @BeanProperty var numClusters: Int,
+                 @BeanProperty var numIterations: Int) {
 
   def compute(spark: SparkSession, data: DataFrame, dbconn: DBConnProperties): Unit = {
     val parsedData = data.drop(data.columns(0)).rdd.map(

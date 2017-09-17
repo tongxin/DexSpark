@@ -19,7 +19,6 @@ import scala.tools.nsc.GenericRunnerSettings
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-
 /**
   * Created by caimy on 2017/1/4.
   */

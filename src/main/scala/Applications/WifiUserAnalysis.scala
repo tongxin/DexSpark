@@ -54,7 +54,7 @@ class WifiUserAnalysis(@BeanProperty var tablename: String,
     //      val numIterations = 50
 
     //Kmeans算法聚类
-    new Cluster(tablename, numClusters, numIterations).compute(spark, matrix, dbconn)
+    new Clustering(tablename, numClusters, numIterations).compute(spark, matrix, dbconn)
   }
 
   //测试
